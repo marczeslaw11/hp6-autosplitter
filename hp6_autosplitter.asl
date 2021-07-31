@@ -15,6 +15,8 @@ state("hp6")
 startup
 {
 	settings.Add("autostart", true, "Autostart on first cutscene (full game run)");
+	settings.Add("splits", false, "Use dedicated Any% splits file (uploaded to Resources)");
+	settings.Add("final", true, "Split on cutscene after defeating Bellatrix");
 }
 
 init
@@ -111,46 +113,52 @@ update
 
 split
 {
-	// cutscene splits
-	if (current.cutscene != old.cutscene && (
-			current.cutscene == "ns02.vp6" // Diagon Alley
-			 || current.cutscene == "ns03.vp6" // hogwarts
-			 || current.cutscene == "ns05.vp6" // hogsmeade
-			 || current.cutscene == "ns08.vp6" // sneaky follow
-			 || current.cutscene == "ns09.vp6" // the burrow
-			 || current.cutscene == "ns11.vp6" // astronomy trap
-			 || current.cutscene == "ns15.vp6" // inferi
-		))
+	if (settings["splits"])
 	{
-		return true;
+		// cutscene splits
+		if (current.cutscene != old.cutscene && (
+				current.cutscene == "ns02.vp6" // Diagon Alley
+				 || current.cutscene == "ns03.vp6" // hogwarts
+				 || current.cutscene == "ns05.vp6" // hogsmeade
+				 || current.cutscene == "ns08.vp6" // sneaky follow
+				 || current.cutscene == "ns09.vp6" // the burrow
+				 || current.cutscene == "ns11.vp6" // astronomy trap
+				 || current.cutscene == "ns15.vp6" // inferi
+			))
+		{
+			return true;
+		}
+
+		return (current.map != old.map &&
+			(current.map == 56 && (
+			 	vars.gamestate == 43 // tryouts
+				 || vars.gamestate == 53 // quidditch 1
+			 	 || vars.gamestate == 101 // practice
+			 	 || vars.gamestate == 122 // quidditch 2
+			 	 || vars.gamestate == 152 // final
+		 	)) // quidditch stuffs
+
+			 || (old.map == 64 && current.map == 18 && (
+			 	vars.gamestate == 30 // potions class
+			 	|| vars.gamestate == 104 // potion of euphoria
+		 	)) // potions
+
+
+			 || (current.map == 0 && vars.gamestate == 11) //Burrow Flying
+			 || (old.map == 40 && current.map == 23 && vars.gamestate == 30) // dueling club
+			 || (old.map == 66 && current.map == 51 && vars.gamestate == 41) // goyle fight	 
+			 || (old.map == 62 && current.map == 60 && vars.gamestate == 62) // Slughorn party
+			 || (old.map == 64 && current.map == 12) // polyjuice
+			 || (old.map == 21 && current.map == 17 && vars.gamestate == 90) // noisy hitter
+			 || (old.map == 62 && current.map == 45 && vars.gamestate == 111) // won-won in love
+			 || (old.map == 49 && current.map == 59 && vars.gamestate == 131) // sectumsempra
+			 || (old.map == 43 && current.map == 41) // felix felicis
+			 || (old.map == 66 && current.map == 17 && vars.gamestate == 144) // crabbe fight
+			 || (current.map == 42 && vars.gamestate == 154) // wiggenweld
+		);
 	}
-
-	return (current.map != old.map &&
-		(current.map == 56 && (
-		 	vars.gamestate == 43 // tryouts
-			 || vars.gamestate == 53 // quidditch 1
-		 	 || vars.gamestate == 101 // practice
-		 	 || vars.gamestate == 122 // quidditch 2
-		 	 || vars.gamestate == 152 // final
-	 	)) // quidditch stuffs
-
-		 || (old.map == 64 && current.map == 18 && (
-		 	vars.gamestate == 30 // potions class
-		 	|| vars.gamestate == 104 // potion of euphoria
-	 	)) // potions
-
-
-		 || (current.map == 0 && vars.gamestate == 11) //Burrow Flying
-		 || (old.map == 40 && current.map == 23 && vars.gamestate == 30) // dueling club
-		 || (old.map == 66 && current.map == 51 && vars.gamestate == 41) // goyle fight	 
-		 || (old.map == 62 && current.map == 60 && vars.gamestate == 62) // Slughorn party
-		 || (old.map == 64 && current.map == 12) // polyjuice
-		 || (old.map == 21 && current.map == 17 && vars.gamestate == 90) // noisy hitter
-		 || (old.map == 62 && current.map == 45 && vars.gamestate == 111) // won-won in love
-		 || (old.map == 49 && current.map == 59 && vars.gamestate == 131) // sectumsempra
-		 || (old.map == 43 && current.map == 41) // felix felicis
-		 || (old.map == 66 && current.map == 17 && vars.gamestate == 144) // crabbe fight
-		 || (current.map == 42 && vars.gamestate == 154) // wiggenweld
-		 || (current.map == 41 && vars.gamestate == 174) // screw you bella
-	);
+	if (settings["final"])
+	{
+		return current.map == 41 && vars.gamestate == 174; // screw you bella
+	}
 }
